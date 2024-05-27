@@ -26,6 +26,7 @@ const (
 type ProbeData struct {
 	Streams []*Stream `json:"streams"`
 	Format  *Format   `json:"format"`
+	Chapters []*Chapter  `json:"chapters"`
 }
 
 // Format is a json data structure to represent formats
@@ -100,6 +101,35 @@ type StreamDisposition struct {
 	VisualImpaired  int `json:"visual_impaired"`
 	CleanEffects    int `json:"clean_effects"`
 	AttachedPic     int `json:"attached_pic"`
+}
+
+// Chapters is a json data structure to represent chapters.
+type Chapter struct {
+	ID               int         `json:"id"`
+	TimeBase         string      `json:"time_base"`
+	StartTimeSeconds float64     `json:"start_time,string"`
+	EndTimeSeconds   float64     `json:"end_time,string"`
+	Tags             *ChapterTags `json:"tags"`
+}
+
+// ChapterTags is a json data structure to represent metadata of a chapter.
+type ChapterTags struct {
+	Title string `json:"title"`
+}
+
+// StartTime returns the start time of the chapter as a time.Duration
+func (c *Chapter) StartTime() (duration time.Duration) {
+	return time.Duration(c.StartTimeSeconds * float64(time.Second))
+}
+
+// EndTime returns the end timestamp of the chapter as a time.Duration
+func (c *Chapter) EndTime() (duration time.Duration) {
+	return time.Duration(c.EndTimeSeconds * float64(time.Second))
+}
+
+// Name returns the value of the "title" tag of the chapter
+func (c *Chapter) Name() string {
+	return c.Tags.Title
 }
 
 // StartTime returns the start time of the media file as a time.Duration

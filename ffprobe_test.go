@@ -144,7 +144,8 @@ func validateData(t *testing.T, data *ProbeData) {
 	}
 
 	stream = data.StreamType(StreamData)
-	if len(stream) != 0 {
+	// We expect at least one data stream, since there are chapters
+	if len(stream) == 0 {
 		t.Errorf("It does not have a data stream.")
 	}
 
@@ -154,7 +155,7 @@ func validateData(t *testing.T, data *ProbeData) {
 	}
 
 	stream = data.StreamType(StreamAny)
-	if len(stream) != 2 {
+	if len(stream) != 3 {
 		t.Errorf("It should have two streams.")
 	}
 
@@ -179,6 +180,26 @@ func validateData(t *testing.T, data *ProbeData) {
 	startTime := data.Format.StartTime()
 	if startTime != time.Duration(0) {
 		t.Errorf("this video starts at 0s.")
+	}
+
+	chapters := data.Chapters
+	if chapters == nil {
+		t.Error("Chapters List was nil")
+		return
+	}
+	if len(chapters) != 3 {
+		t.Errorf("Expected 3 chapters. Got %d", len(chapters))
+		return
+	}
+	chapterToTest := chapters[1]
+	if chapterToTest.Name() != "Middle" {
+		t.Errorf("Bad Chapter Name. Got %s", chapterToTest.Name())
+	}
+	if chapterToTest.StartTimeSeconds != 2.0 {
+		t.Errorf("Bad Chapter Start Time. Got %f", chapterToTest.StartTimeSeconds)
+	}
+	if chapterToTest.EndTimeSeconds != 4.0 {
+		t.Errorf("Bad Chapter End Time. Got %f", chapterToTest.EndTimeSeconds)
 	}
 }
 
