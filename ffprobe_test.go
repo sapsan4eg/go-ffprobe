@@ -156,7 +156,7 @@ func validateData(t *testing.T, data *ProbeData) {
 
 	stream = data.StreamType(StreamAny)
 	if len(stream) != 3 {
-		t.Errorf("It should have two streams.")
+		t.Errorf("It should have three streams.")
 	}
 
 	// Check some Tags
