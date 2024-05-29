@@ -192,8 +192,8 @@ func validateData(t *testing.T, data *ProbeData) {
 		return
 	}
 	chapterToTest := chapters[1]
-	if chapterToTest.Name() != "Middle" {
-		t.Errorf("Bad Chapter Name. Got %s", chapterToTest.Name())
+	if chapterToTest.Title() != "Middle" {
+		t.Errorf("Bad Chapter Name. Got %s", chapterToTest.Title())
 	}
 	if chapterToTest.StartTimeSeconds != 2.0 {
 		t.Errorf("Bad Chapter Start Time. Got %f", chapterToTest.StartTimeSeconds)

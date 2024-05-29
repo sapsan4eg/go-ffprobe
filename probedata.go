@@ -123,7 +123,7 @@ func (c *Chapter) EndTime() time.Duration {
 }
 
 // Name returns the value of the "title" tag of the chapter
-func (c *Chapter) Name() string {
+func (c *Chapter) Title() string {
 	title, _ := c.TagList.GetString("title")
 	return title
 }
