@@ -24,8 +24,9 @@ const (
 
 // ProbeData is the root json data structure returned by an ffprobe.
 type ProbeData struct {
-	Streams []*Stream `json:"streams"`
-	Format  *Format   `json:"format"`
+	Streams  []*Stream  `json:"streams"`
+	Format   *Format    `json:"format"`
+	Chapters []*Chapter `json:"chapters"`
 }
 
 // Format is a json data structure to represent formats
@@ -100,6 +101,31 @@ type StreamDisposition struct {
 	VisualImpaired  int `json:"visual_impaired"`
 	CleanEffects    int `json:"clean_effects"`
 	AttachedPic     int `json:"attached_pic"`
+}
+
+// Chapters is a json data structure to represent chapters.
+type Chapter struct {
+	ID               int     `json:"id"`
+	TimeBase         string  `json:"time_base"`
+	StartTimeSeconds float64 `json:"start_time,string"`
+	EndTimeSeconds   float64 `json:"end_time,string"`
+	TagList          Tags    `json:"tags"`
+}
+
+// StartTime returns the start time of the chapter as a time.Duration
+func (c *Chapter) StartTime() time.Duration {
+	return time.Duration(c.StartTimeSeconds * float64(time.Second))
+}
+
+// EndTime returns the end timestamp of the chapter as a time.Duration
+func (c *Chapter) EndTime() time.Duration {
+	return time.Duration(c.EndTimeSeconds * float64(time.Second))
+}
+
+// Name returns the value of the "title" tag of the chapter
+func (c *Chapter) Title() string {
+	title, _ := c.TagList.GetString("title")
+	return title
 }
 
 // StartTime returns the start time of the media file as a time.Duration

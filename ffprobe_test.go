@@ -111,6 +111,33 @@ func Test_ProbeReader_Error(t *testing.T) {
 }
 
 func validateData(t *testing.T, data *ProbeData) {
+	validateStreams(t, data)
+	// Check some Tags
+	const testMajorBrand = "isom"
+	if data.Format.Tags.MajorBrand != testMajorBrand {
+		t.Errorf("MajorBrand format tag is not %s", testMajorBrand)
+	}
+
+	if val, err := data.Format.TagList.GetString("major_brand"); err != nil {
+		t.Errorf("retrieving major_brand tag errors: %v", err)
+	} else if val != testMajorBrand {
+		t.Errorf("MajorBrand format tag is not %s", testMajorBrand)
+	}
+
+	// test Format.Duration
+	duration := data.Format.Duration()
+	if duration.Seconds() != 5.312 {
+		t.Errorf("this video is 5.312s.")
+	}
+	// test Format.StartTime
+	startTime := data.Format.StartTime()
+	if startTime != time.Duration(0) {
+		t.Errorf("this video starts at 0s.")
+	}
+	validateChapters(t, data)
+}
+
+func validateStreams(t *testing.T, data *ProbeData) {
 	// test ProbeData.GetStream
 	stream := data.StreamType(StreamVideo)
 	if len(stream) != 1 {
@@ -144,7 +171,8 @@ func validateData(t *testing.T, data *ProbeData) {
 	}
 
 	stream = data.StreamType(StreamData)
-	if len(stream) != 0 {
+	// We expect at least one data stream, since there are chapters
+	if len(stream) == 0 {
 		t.Errorf("It does not have a data stream.")
 	}
 
@@ -154,31 +182,30 @@ func validateData(t *testing.T, data *ProbeData) {
 	}
 
 	stream = data.StreamType(StreamAny)
-	if len(stream) != 2 {
-		t.Errorf("It should have two streams.")
+	if len(stream) != 3 {
+		t.Errorf("It should have three streams.")
 	}
+}
 
-	// Check some Tags
-	const testMajorBrand = "isom"
-	if data.Format.Tags.MajorBrand != testMajorBrand {
-		t.Errorf("MajorBrand format tag is not %s", testMajorBrand)
+func validateChapters(t *testing.T, data *ProbeData) {
+	chapters := data.Chapters
+	if chapters == nil {
+		t.Error("Chapters List was nil")
+		return
 	}
-
-	if val, err := data.Format.TagList.GetString("major_brand"); err != nil {
-		t.Errorf("retrieving major_brand tag errors: %v", err)
-	} else if val != testMajorBrand {
-		t.Errorf("MajorBrand format tag is not %s", testMajorBrand)
+	if len(chapters) != 3 {
+		t.Errorf("Expected 3 chapters. Got %d", len(chapters))
+		return
 	}
-
-	// test Format.Duration
-	duration := data.Format.Duration()
-	if duration.Seconds() != 5.312 {
-		t.Errorf("this video is 5.312s.")
+	chapterToTest := chapters[1]
+	if chapterToTest.Title() != "Middle" {
+		t.Errorf("Bad Chapter Name. Got %s", chapterToTest.Title())
 	}
-	// test Format.StartTime
-	startTime := data.Format.StartTime()
-	if startTime != time.Duration(0) {
-		t.Errorf("this video starts at 0s.")
+	if chapterToTest.StartTimeSeconds != 2.0 {
+		t.Errorf("Bad Chapter Start Time. Got %f", chapterToTest.StartTimeSeconds)
+	}
+	if chapterToTest.EndTimeSeconds != 4.0 {
+		t.Errorf("Bad Chapter End Time. Got %f", chapterToTest.EndTimeSeconds)
 	}
 }
 
